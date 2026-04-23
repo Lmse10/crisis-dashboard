@@ -8,4 +8,4 @@ Here's how the three-layer architecture eliminates fragmented communication:
 
 **Key design choices that prevent failure under pressure:** the system is trigger-pull by default (auto-escalation without waiting for manual confirmation), multi-redundant in detection (any one channel can start the chain), and offline-capable at the property level (local edge processing means a lost internet connection doesn't disable alerting).
 
-Want me to go deeper on any specific layer — the AI triage logic, the emergency services API handoff protocol, the guest-facing mobile experience, or the staff command interface?
+
