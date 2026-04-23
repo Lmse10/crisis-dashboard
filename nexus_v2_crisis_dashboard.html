@@ -1,0 +1,479 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.surface{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:100px}
+.badge-red{background:var(--color-background-danger);color:var(--color-text-danger)}
+.badge-amber{background:var(--color-background-warning);color:var(--color-text-warning)}
+.badge-green{background:var(--color-background-success);color:var(--color-text-success)}
+.badge-info{background:var(--color-background-info);color:var(--color-text-info)}
+.badge-gray{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dot-green{background:var(--color-text-success)}.dot-red{background:var(--color-text-danger)}
+@keyframes pulse-op{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes slide-down{from{transform:translateY(-5px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slide-up{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
+@keyframes td{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.pulse{animation:pulse-op 1.4s ease-in-out infinite}
+.pane{display:none}.pane.active{display:block}
+.tab{font-size:13px;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:color .15s;font-weight:400}
+.tab.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
+.tab:hover:not(.active){color:var(--color-text-primary)}
+.btn{font-size:13px;padding:9px 18px;border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);font-weight:500;transition:all .15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-danger{border-color:var(--color-border-danger,var(--color-text-danger));color:var(--color-text-danger)}
+.btn-danger:hover{background:var(--color-background-danger)}
+.btn-success{border-color:var(--color-text-success);color:var(--color-text-success)}
+.btn-success:hover{background:var(--color-background-success)}
+.ipill{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;flex:1;background:transparent;transition:all .15s}
+.ipill:hover{background:var(--color-background-secondary)}
+.ipill.sel-fire{border-color:var(--color-text-danger);background:var(--color-background-danger)}
+.ipill.sel-med{border-color:var(--color-text-info);background:var(--color-background-info)}
+.ipill.sel-sec{border-color:var(--color-text-warning);background:var(--color-background-warning)}
+.ipill.sel-evac{border-color:var(--color-text-warning);background:var(--color-background-warning)}
+.pill-label{font-size:11px;font-weight:500;color:var(--color-text-secondary)}
+.ipill.sel-fire .pill-label{color:var(--color-text-danger)}
+.ipill.sel-med .pill-label{color:var(--color-text-info)}
+.ipill.sel-sec .pill-label, .ipill.sel-evac .pill-label{color:var(--color-text-warning)}
+.zone-cell{border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);padding:10px 12px;cursor:pointer;transition:border-color .25s, background .25s;background:var(--color-background-secondary)}
+.zone-cell:hover{border-color:var(--color-border-secondary)}
+.zone-name{font-size:12px;font-weight:500;color:var(--color-text-primary);transition:color .25s}
+.zone-status{font-size:11px;color:var(--color-text-secondary);margin-top:3px;transition:color .25s}
+.zone-cell.z-alert{border-color:var(--color-text-danger);background:var(--color-background-danger)}
+.zone-cell.z-alert .zone-name{color:var(--color-text-danger)}
+.zone-cell.z-alert .zone-status{color:var(--color-text-danger)}
+.zone-cell.z-warn{border-color:var(--color-text-warning);background:var(--color-background-warning)}
+.zone-cell.z-warn .zone-name{color:var(--color-text-warning)}
+.zone-cell.z-warn .zone-status{color:var(--color-text-warning)}
+.zone-cell.z-info{border-color:var(--color-text-info);background:var(--color-background-info)}
+.zone-cell.z-info .zone-name{color:var(--color-text-info)}
+.zone-cell.z-info .zone-status{color:var(--color-text-info)}
+.flow-node{display:flex;flex-direction:column;align-items:center;gap:5px}
+.flow-icon{width:38px;height:38px;border-radius:50%;border:0.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .35s}
+.flow-icon.lit-d{border-color:var(--color-text-danger);background:var(--color-background-danger);color:var(--color-text-danger)}
+.flow-icon.lit-w{border-color:var(--color-text-warning);background:var(--color-background-warning);color:var(--color-text-warning)}
+.flow-icon.lit-s{border-color:var(--color-text-success);background:var(--color-background-success);color:var(--color-text-success)}
+.flow-conn{flex:1;height:1px;background:var(--color-border-tertiary);position:relative;align-self:center;margin-bottom:22px}
+.flow-conn-fill{position:absolute;top:0;left:0;height:1px;width:0;transition:width .45s ease}
+.fc-d{background:var(--color-text-danger)}.fc-w{background:var(--color-text-warning)}.fc-s{background:var(--color-text-success)}
+.msg-row{display:flex;gap:9px;margin-bottom:12px}
+.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
+.msg-meta{font-size:10px;color:var(--color-text-tertiary);margin-bottom:3px}
+.msg-bub{font-size:12px;line-height:1.55;padding:8px 11px;border-radius:0 8px 8px 8px;background:var(--color-background-secondary);color:var(--color-text-primary);display:inline-block;max-width:95%}
+.msg-bub.out{background:var(--color-background-info);color:var(--color-text-info);border-radius:8px 0 8px 8px}
+.typing{display:flex;gap:4px;padding:9px 12px;background:var(--color-background-secondary);border-radius:0 8px 8px 8px;width:fit-content}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--color-text-tertiary)}
+.typing span:nth-child(1){animation:td .9s ease-in-out infinite 0s}
+.typing span:nth-child(2){animation:td .9s ease-in-out infinite .15s}
+.typing span:nth-child(3){animation:td .9s ease-in-out infinite .3s}
+.resp-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.resp-row:last-child{border-bottom:none}
+.r-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .3s}
+.sev-track{height:5px;border-radius:3px;background:var(--color-border-tertiary);overflow:hidden}
+.sev-fill{height:100%;border-radius:3px;transition:width .6s ease, background .6s ease}
+.stat-v{font-size:22px;font-weight:500;color:var(--color-text-primary);transition:color .3s}
+.stat-l{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.sig-entry{font-size:11px;display:flex;gap:8px;padding:4px 8px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);animation:slide-down .25s ease}
+</style>
+
+<h2 class="sr-only">NEXUS v2 — hospitality crisis command center with four incident scenarios</h2>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="width:40px;height:40px;border-radius:10px;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="color:var(--color-text-info)">
+        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M11 7v5l3.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M11 3v1M11 18v1M3 11H2M20 11h-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <p style="font-size:16px;font-weight:500;color:var(--color-text-primary)">NEXUS</p>
+      <p style="font-size:11px;color:var(--color-text-secondary)">Grand Azure Hotel · Operations center</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:12px;color:var(--color-text-tertiary);font-variant-numeric:tabular-nums" id="clk">--:--:--</span>
+    <span id="badge-ok" class="badge badge-green pulse"><span class="dot dot-green"></span>All clear</span>
+    <span id="badge-inc" class="badge badge-red pulse" style="display:none"><span class="dot dot-red"></span>Incident active</span>
+    <span id="elapsed" style="display:none;font-size:12px;font-weight:500;color:var(--color-text-secondary);font-variant-numeric:tabular-nums;background:var(--color-background-secondary);padding:3px 8px;border-radius:100px">0:00</span>
+  </div>
+</div>
+
+<div style="margin-bottom:1rem">
+  <p style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:8px">INCIDENT SCENARIO</p>
+  <div style="display:flex;gap:8px">
+    <button class="ipill sel-fire" id="p-fire" onclick="selType('fire')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:var(--color-text-danger)"><path d="M8 2C8 2 5 5.5 5 8.5C5 10.43 6.34 12 8 12C9.66 12 11 10.43 11 8.5C11 7 10.2 5.8 10.2 5.8C10.2 5.8 9.6 7.2 8.6 7.2C8.6 7.2 9.5 5 8 2Z" fill="currentColor"/></svg>
+      <span class="pill-label">Fire</span>
+    </button>
+    <button class="ipill" id="p-med" onclick="selType('med')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:var(--color-text-secondary)"><rect x="7" y="3" width="2" height="10" rx="1" fill="currentColor"/><rect x="3" y="7" width="10" height="2" rx="1" fill="currentColor"/></svg>
+      <span class="pill-label">Medical</span>
+    </button>
+    <button class="ipill" id="p-sec" onclick="selType('sec')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:var(--color-text-secondary)"><path d="M8 2L13 4.5V9C13 11.76 10.76 14 8 14C5.24 14 3 11.76 3 9V4.5L8 2Z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+      <span class="pill-label">Security</span>
+    </button>
+    <button class="ipill" id="p-evac" onclick="selType('evac')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:var(--color-text-secondary)"><path d="M8 2L3 8H6.5V14H9.5V8H13L8 2Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></svg>
+      <span class="pill-label">Evacuation</span>
+    </button>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.75rem">
+  <div class="surface"><div class="stat-v" id="sv-alerts">0</div><div class="stat-l">Active alerts</div></div>
+  <div class="surface"><div class="stat-v" id="sv-zones">0 / 8</div><div class="stat-l">Zones flagged</div></div>
+  <div class="surface"><div class="stat-v" id="sv-staff">0</div><div class="stat-l">Staff deployed</div></div>
+  <div class="surface"><div class="stat-v" id="sv-time" style="font-size:18px">--</div><div class="stat-l">First response</div></div>
+</div>
+
+<div style="margin-bottom:1rem">
+  <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+    <span style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary)">SEVERITY LEVEL</span>
+    <span style="font-size:11px;color:var(--color-text-secondary)" id="sev-label">None</span>
+  </div>
+  <div class="sev-track"><div class="sev-fill" id="sev-fill" style="width:0%;background:var(--color-text-secondary)"></div></div>
+</div>
+
+<div style="display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1rem">
+  <button class="tab active" onclick="showTab('floor',this)">Floor plan</button>
+  <button class="tab" onclick="showTab('flow',this)">Signal flow</button>
+  <button class="tab" onclick="showTab('comms',this)">Comms bridge</button>
+  <button class="tab" onclick="showTab('resp',this)">Responders</button>
+</div>
+
+<div class="pane active" id="pane-floor">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    <div class="zone-cell" id="z-ball" onclick="sendPrompt('How does NEXUS handle a crisis in the Grand Ballroom?')">
+      <div class="zone-name">Grand Ballroom</div><div class="zone-status" id="zs-ball">No activity</div>
+    </div>
+    <div class="zone-cell" id="z-conf" onclick="sendPrompt('How does NEXUS handle a crisis in the Conference Center?')">
+      <div class="zone-name">Conference</div><div class="zone-status" id="zs-conf">No activity</div>
+    </div>
+    <div class="zone-cell" id="z-f35" style="grid-row:span 2" onclick="sendPrompt('What happens when a fire is detected on Floors 3–5?')">
+      <div class="zone-name">Floors 3 – 5</div><div class="zone-status" id="zs-f35">No activity</div>
+    </div>
+    <div class="zone-cell" id="z-spa" onclick="sendPrompt('How does NEXUS respond to a medical emergency in the Spa?')">
+      <div class="zone-name">Spa &amp; Wellness</div><div class="zone-status" id="zs-spa">No activity</div>
+    </div>
+    <div class="zone-cell" id="z-lob" style="grid-row:span 2" onclick="sendPrompt('How is the lobby used as a command post during a crisis?')">
+      <div class="zone-name">Lobby &amp; reception</div><div class="zone-status" id="zs-lob">No activity</div>
+    </div>
+    <div class="zone-cell" id="z-rest" onclick="sendPrompt('What safety protocols apply to the restaurant?')">
+      <div class="zone-name">Restaurant</div><div class="zone-status" id="zs-rest">No activity</div>
+    </div>
+    <div class="zone-cell" id="z-f12" onclick="sendPrompt('How are floors 1–2 evacuated in an emergency?')">
+      <div class="zone-name">Floors 1 – 2</div><div class="zone-status" id="zs-f12">No activity</div>
+    </div>
+    <div class="zone-cell" id="z-park" style="grid-column:span 3" onclick="sendPrompt('How does NEXUS monitor the parking structure?')">
+      <div class="zone-name">Parking structure</div><div class="zone-status" id="zs-park">No activity</div>
+    </div>
+  </div>
+  <div id="sfeed-wrap" style="display:none;margin-top:.75rem">
+    <p style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:6px">LIVE SENSOR FEED</p>
+    <div id="sfeed" style="display:flex;flex-direction:column;gap:4px"></div>
+  </div>
+</div>
+
+<div class="pane" id="pane-flow">
+  <div class="card" style="margin-bottom:.75rem">
+    <p style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:1rem">DETECTION → DISPATCH PIPELINE</p>
+    <div style="display:flex;align-items:center">
+      <div class="flow-node">
+        <div class="flow-icon" id="fn-det">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+        </div>
+        <span style="font-size:10px;color:var(--color-text-secondary);text-align:center;white-space:nowrap">Detect</span>
+      </div>
+      <div class="flow-conn"><div id="fc1" class="flow-conn-fill"></div></div>
+      <div class="flow-node">
+        <div class="flow-icon" id="fn-tri">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 6V10L8 14L2 10V6L8 2Z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M6.5 8h3M8 6.5v3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+        </div>
+        <span style="font-size:10px;color:var(--color-text-secondary);text-align:center;white-space:nowrap">AI triage</span>
+      </div>
+      <div class="flow-conn"><div id="fc2" class="flow-conn-fill"></div></div>
+      <div class="flow-node">
+        <div class="flow-icon" id="fn-pro">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 6.5h6M5 9h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+        </div>
+        <span style="font-size:10px;color:var(--color-text-secondary);text-align:center;white-space:nowrap">Protocol</span>
+      </div>
+      <div class="flow-conn"><div id="fc3" class="flow-conn-fill"></div></div>
+      <div class="flow-node">
+        <div class="flow-icon" id="fn-sta">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 14.5C3 11.74 5.24 9.5 8 9.5C10.76 9.5 13 11.74 13 14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <span style="font-size:10px;color:var(--color-text-secondary);text-align:center;white-space:nowrap">Staff alert</span>
+      </div>
+      <div class="flow-conn"><div id="fc4" class="flow-conn-fill"></div></div>
+      <div class="flow-node">
+        <div class="flow-icon" id="fn-dis">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8L7 3.5V6.5H14V9.5H7V12.5L2.5 8Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></svg>
+        </div>
+        <span style="font-size:10px;color:var(--color-text-secondary);text-align:center;white-space:nowrap">Dispatch</span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <p style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.75rem">SIGNAL LOG</p>
+    <div id="siglog-idle" style="font-size:13px;color:var(--color-text-secondary);text-align:center;padding:1.5rem 0">No signals. Awaiting incident.</div>
+    <div id="siglog" style="display:none;flex-direction:column;gap:5px"></div>
+  </div>
+</div>
+
+<div class="pane" id="pane-comms">
+  <div class="card">
+    <p style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.75rem">UNIFIED COMMS BRIDGE</p>
+    <div id="comms-idle" style="font-size:13px;color:var(--color-text-secondary);text-align:center;padding:2rem 0">Bridge ready · No active incident<br><span style="font-size:11px">All parties synchronize on first alert</span></div>
+    <div id="comms-feed" style="display:none;flex-direction:column"></div>
+  </div>
+</div>
+
+<div class="pane" id="pane-resp">
+  <div class="card" style="margin-bottom:.75rem">
+    <p style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.75rem">ON-SITE STAFF</p>
+    <div class="resp-row"><div class="r-av" id="av-ms">MS</div><div style="flex:1"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Marco Santos</p><p style="font-size:11px;color:var(--color-text-secondary)">Security lead</p></div><span class="badge badge-green" id="b-ms">On duty</span></div>
+    <div class="resp-row"><div class="r-av" id="av-pk">PK</div><div style="flex:1"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Priya Kapoor</p><p style="font-size:11px;color:var(--color-text-secondary)">Duty manager</p></div><span class="badge badge-green" id="b-pk">On duty</span></div>
+    <div class="resp-row"><div class="r-av" id="av-jo">JO</div><div style="flex:1"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary)">James Okafor</p><p style="font-size:11px;color:var(--color-text-secondary)">First aid</p></div><span class="badge badge-green" id="b-jo">On duty</span></div>
+  </div>
+  <div class="card">
+    <p style="font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-secondary);margin-bottom:.75rem">EXTERNAL RESPONDERS</p>
+    <div id="ext-idle" style="font-size:13px;color:var(--color-text-secondary);text-align:center;padding:1.25rem 0">Emergency services on standby</div>
+    <div id="ext-list" style="display:none">
+      <div class="resp-row"><div class="r-av" id="ext-av" style="background:var(--color-background-secondary)">--</div><div style="flex:1"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary)" id="ext-name">—</p><p style="font-size:11px;color:var(--color-text-secondary)" id="ext-sub">—</p></div><span class="badge" id="ext-badge">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:1rem;align-items:center">
+  <button class="btn btn-danger" id="btn-sim" onclick="triggerIncident()" style="flex:1;padding:10px">Simulate crisis</button>
+  <button class="btn btn-success" id="btn-res" style="flex:1;padding:10px;display:none" onclick="resolve()">Mark resolved &amp; reset</button>
+</div>
+
+<script>
+let active=false, sel='fire', elInt=null, t0=null;
+const ZONES=['ball','conf','f35','spa','lob','rest','f12','park'];
+
+setInterval(()=>{const n=new Date();document.getElementById('clk').textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':')},1000);
+
+function showTab(id,el){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+const PCLASSES={fire:'sel-fire',med:'sel-med',sec:'sel-sec',evac:'sel-evac'};
+function selType(t){
+  if(active)return;
+  sel=t;
+  ['fire','med','sec','evac'].forEach(k=>{
+    const p=document.getElementById('p-'+k);
+    p.className='ipill'+(k===t?' '+PCLASSES[k]:'');
+  });
+}
+
+const SC={
+  fire:{
+    zones:[{id:'f35',cls:'z-alert',st:'SMOKE DETECTED',t:0},{id:'f12',cls:'z-warn',st:'Adjacent — monitor',t:3000},{id:'lob',cls:'z-info',st:'Command post',t:4500}],
+    sigs:[{t:0,tx:'Smoke sensor F3-14 triggered',c:'d'},{t:1100,tx:'Guest SOS · Room 312: smoke visible',c:'d'},{t:2200,tx:'AI triage: HIGH · fire probable (94%)',c:'w'},{t:3200,tx:'Protocol ALPHA initiated — floor 3 evac',c:'w'},{t:4200,tx:'Staff paged: Marco, Priya, James',c:'s'},{t:5600,tx:'Fire brigade dispatched · ETA 4 min',c:'d'},{t:7500,tx:'Floor 3 clear — guests at muster point',c:'s'}],
+    stats:[{t:0,a:1,z:1,s:0,r:'--'},{t:2500,a:2,z:1,s:0,r:'--'},{t:4000,a:3,z:2,s:3,r:'0:42'},{t:6000,a:3,z:2,s:3,r:'1:05'}],
+    sev:[{t:0,p:65,c:'var(--color-text-danger)',l:'High'},{t:5000,p:88,c:'var(--color-text-danger)',l:'Critical'},{t:7500,p:38,c:'var(--color-text-warning)',l:'Moderate'}],
+    flow:[{t:300,n:'fn-det',f:'fc1',cls:'lit-d'},{t:1500,n:'fn-tri',f:'fc2',cls:'lit-w'},{t:2700,n:'fn-pro',f:'fc3',cls:'lit-w'},{t:3900,n:'fn-sta',f:'fc4',cls:'lit-s'},{t:5300,n:'fn-dis',f:null,cls:'lit-d'}],
+    comms:[
+      {t:0,fr:'Guest · Room 312',av:'G',c:'danger',tx:'SOS — I can smell smoke under my door. What should I do?',out:false,typ:false},
+      {t:1800,fr:'NEXUS AI',av:'AI',c:'warning',tx:'Severity HIGH. Smoke confirmed F3-14. Floor 3 evacuation active. PA broadcast + door release triggered. Proceed to stairwell B.',out:false,typ:true},
+      {t:3800,fr:'Security · Marco S.',av:'MS',c:'success',tx:'En route Floor 3. Stairwell B clear. Moving guests to muster point.',out:true,typ:false},
+      {t:5500,fr:'Fire Brigade dispatch',av:'FB',c:'info',tx:'Unit 7 responding. ETA 4 min. Floor plan + hydrant map received.',out:true,typ:false},
+    ],
+    ext:{av:'FB',name:'Fire Brigade — Unit 7',sub:'Auto-dispatched · ETA 4 min',badge:'En route',bc:'badge-red',bg:'var(--color-background-danger)',col:'var(--color-text-danger)'},
+    staff:[{id:'ms',badge:'badge-red',bTx:'To Floor 3',avBg:'var(--color-background-danger)',avC:'var(--color-text-danger)'},{id:'pk',badge:'badge-amber',bTx:'Command post',avBg:'var(--color-background-warning)',avC:'var(--color-text-warning)'},{id:'jo',badge:'badge-info',bTx:'Muster point',avBg:'var(--color-background-info)',avC:'var(--color-text-info)'}],
+  },
+  med:{
+    zones:[{id:'spa',cls:'z-alert',st:'MEDICAL ALERT',t:0},{id:'lob',cls:'z-info',st:'Command post',t:2500}],
+    sigs:[{t:0,tx:'Panic button · Spa: guest unresponsive',c:'d'},{t:1000,tx:'AI triage: MEDICAL · cardiac event likely',c:'w'},{t:2000,tx:'Protocol DELTA: medical response',c:'w'},{t:3000,tx:'James Okafor dispatched to Spa',c:'s'},{t:4400,tx:'Ambulance notified · ETA 6 min',c:'d'},{t:6200,tx:'Guest stabilised — paramedics on-site',c:'s'}],
+    stats:[{t:0,a:1,z:1,s:1,r:'--'},{t:3000,a:2,z:2,s:2,r:'0:32'},{t:5000,a:2,z:2,s:2,r:'0:54'}],
+    sev:[{t:0,p:58,c:'var(--color-text-danger)',l:'High'},{t:5000,p:28,c:'var(--color-text-warning)',l:'Moderate'}],
+    flow:[{t:200,n:'fn-det',f:'fc1',cls:'lit-d'},{t:1200,n:'fn-tri',f:'fc2',cls:'lit-w'},{t:2200,n:'fn-pro',f:'fc3',cls:'lit-w'},{t:3200,n:'fn-sta',f:'fc4',cls:'lit-s'},{t:4600,n:'fn-dis',f:null,cls:'lit-d'}],
+    comms:[
+      {t:0,fr:'Spa staff',av:'SP',c:'danger',tx:'Guest collapsed in treatment room B — not breathing. Need help immediately.',out:false,typ:false},
+      {t:1600,fr:'NEXUS AI',av:'AI',c:'warning',tx:'Medical emergency confirmed. Protocol DELTA active. James Okafor en route with AED. Ambulance auto-notified.',out:false,typ:true},
+      {t:3400,fr:'James Okafor · First Aid',av:'JO',c:'success',tx:'On scene in 90 sec. AED collected from F1 station. Please clear the area.',out:true,typ:false},
+      {t:5200,fr:'Ambulance dispatch',av:'AM',c:'info',tx:'Paramedic unit responding. ETA 6 min. Patient vitals summary received.',out:true,typ:false},
+    ],
+    ext:{av:'AM',name:'Ambulance — Unit 3',sub:'Auto-dispatched · ETA 6 min',badge:'En route',bc:'badge-red',bg:'var(--color-background-danger)',col:'var(--color-text-danger)'},
+    staff:[{id:'jo',badge:'badge-red',bTx:'To Spa',avBg:'var(--color-background-danger)',avC:'var(--color-text-danger)'},{id:'pk',badge:'badge-amber',bTx:'Coordinating',avBg:'var(--color-background-warning)',avC:'var(--color-text-warning)'},{id:'ms',badge:'badge-info',bTx:'Standing by',avBg:'var(--color-background-info)',avC:'var(--color-text-info)'}],
+  },
+  sec:{
+    zones:[{id:'park',cls:'z-alert',st:'BREACH DETECTED',t:0},{id:'lob',cls:'z-warn',st:'Soft lockdown',t:2000},{id:'ball',cls:'z-info',st:'Shelter in place',t:3500}],
+    sigs:[{t:0,tx:'CCTV AI: tailgate detected — Parking B2',c:'d'},{t:1000,tx:'AI triage: SECURITY · 2 unauthorized individuals',c:'w'},{t:2000,tx:'Protocol BRAVO: soft lockdown',c:'w'},{t:3000,tx:'Marco Santos paged — secure perimeter',c:'s'},{t:4600,tx:'Police notified · ETA 8 min',c:'d'},{t:6800,tx:'Suspects detained at east exit',c:'s'}],
+    stats:[{t:0,a:1,z:1,s:1,r:'--'},{t:2500,a:2,z:2,s:1,r:'0:24'},{t:4500,a:2,z:3,s:2,r:'0:46'}],
+    sev:[{t:0,p:52,c:'var(--color-text-warning)',l:'Moderate'},{t:3000,p:72,c:'var(--color-text-danger)',l:'High'},{t:6500,p:18,c:'var(--color-text-success)',l:'Low'}],
+    flow:[{t:200,n:'fn-det',f:'fc1',cls:'lit-d'},{t:1200,n:'fn-tri',f:'fc2',cls:'lit-w'},{t:2200,n:'fn-pro',f:'fc3',cls:'lit-w'},{t:3200,n:'fn-sta',f:'fc4',cls:'lit-s'},{t:4600,n:'fn-dis',f:null,cls:'lit-s'}],
+    comms:[
+      {t:0,fr:'CCTV AI',av:'CC',c:'danger',tx:'Anomaly: 2 individuals tailgating B2 entry gate. Unauthorised. Confidence 91%.',out:false,typ:false},
+      {t:1500,fr:'NEXUS AI',av:'AI',c:'warning',tx:'Security breach confirmed. Protocol BRAVO active. Soft lockdown — exits monitored. CCTV feed flagged.',out:false,typ:true},
+      {t:3200,fr:'Marco Santos · Security',av:'MS',c:'success',tx:'Responding. B2 feed pulled. Tracking subjects toward east corridor.',out:true,typ:false},
+      {t:5200,fr:'Police dispatch',av:'PD',c:'info',tx:'Units responding. ETA 8 min. CCTV footage package received.',out:true,typ:false},
+    ],
+    ext:{av:'PD',name:'Police — Car 22',sub:'Notified · ETA 8 min',badge:'Dispatched',bc:'badge-amber',bg:'var(--color-background-warning)',col:'var(--color-text-warning)'},
+    staff:[{id:'ms',badge:'badge-red',bTx:'Perimeter',avBg:'var(--color-background-danger)',avC:'var(--color-text-danger)'},{id:'pk',badge:'badge-info',bTx:'CCTV room',avBg:'var(--color-background-info)',avC:'var(--color-text-info)'},{id:'jo',badge:'badge-gray',bTx:'Standby',avBg:'var(--color-background-secondary)',avC:'var(--color-text-secondary)'}],
+  },
+  evac:{
+    zones:[{id:'ball',cls:'z-alert',st:'EVACUATING',t:0},{id:'conf',cls:'z-warn',st:'Clearing',t:800},{id:'rest',cls:'z-warn',st:'Clearing',t:1400},{id:'f35',cls:'z-warn',st:'Floors clearing',t:2000},{id:'f12',cls:'z-warn',st:'Floors clearing',t:2500},{id:'spa',cls:'z-warn',st:'Clearing',t:3000},{id:'lob',cls:'z-info',st:'Muster point',t:3500},{id:'park',cls:'z-info',st:'Exit route active',t:3500}],
+    sigs:[{t:0,tx:'Structural sensor: ballroom ceiling overload',c:'d'},{t:800,tx:'AI: CRITICAL — full building evacuation',c:'d'},{t:1800,tx:'Protocol OMEGA: all zones evacuating',c:'w'},{t:2800,tx:'All staff mobilised — 8 personnel',c:'s'},{t:4200,tx:'3 fire units + structural team dispatched',c:'d'},{t:7500,tx:'Building clear — 312 guests at muster',c:'s'}],
+    stats:[{t:0,a:1,z:1,s:0,r:'--'},{t:2000,a:4,z:5,s:5,r:'0:20'},{t:4000,a:7,z:8,s:8,r:'0:42'}],
+    sev:[{t:0,p:94,c:'var(--color-text-danger)',l:'Critical'},{t:7000,p:48,c:'var(--color-text-warning)',l:'Moderate'}],
+    flow:[{t:200,n:'fn-det',f:'fc1',cls:'lit-d'},{t:1000,n:'fn-tri',f:'fc2',cls:'lit-d'},{t:1800,n:'fn-pro',f:'fc3',cls:'lit-d'},{t:2800,n:'fn-sta',f:'fc4',cls:'lit-w'},{t:4000,n:'fn-dis',f:null,cls:'lit-d'}],
+    comms:[
+      {t:0,fr:'Building sensor',av:'BS',c:'danger',tx:'CRITICAL: Ballroom ceiling load sensor at 340% threshold. Structural failure risk.',out:false,typ:false},
+      {t:1200,fr:'NEXUS AI',av:'AI',c:'warning',tx:'CRITICAL. Full building evacuation — Protocol OMEGA. All exits unlocked. PA broadcasting. Muster point: east car park.',out:false,typ:true},
+      {t:3200,fr:'Priya Kapoor · Manager',av:'PK',c:'success',tx:'Evacuation underway. All staff at positions. Muster count initiated.',out:true,typ:false},
+      {t:5800,fr:'Fire Brigade',av:'FB',c:'info',tx:'3 units responding + structural engineers. ETA 5 min. Building schematic received.',out:true,typ:false},
+    ],
+    ext:{av:'FB',name:'Fire Brigade — 3 units + structural',sub:'Auto-dispatched · ETA 5 min',badge:'En route',bc:'badge-red',bg:'var(--color-background-danger)',col:'var(--color-text-danger)'},
+    staff:[{id:'ms',badge:'badge-red',bTx:'Floor 3 clear',avBg:'var(--color-background-danger)',avC:'var(--color-text-danger)'},{id:'pk',badge:'badge-red',bTx:'Command post',avBg:'var(--color-background-danger)',avC:'var(--color-text-danger)'},{id:'jo',badge:'badge-amber',bTx:'Muster count',avBg:'var(--color-background-warning)',avC:'var(--color-text-warning)'}],
+  },
+};
+
+function setZ(id,cls,st){
+  const e=document.getElementById('z-'+id);
+  e.className='zone-cell '+(cls||'');
+  document.getElementById('zs-'+id).textContent=st;
+}
+function setSev(p,c,l){
+  document.getElementById('sev-fill').style.width=p+'%';
+  document.getElementById('sev-fill').style.background=c;
+  document.getElementById('sev-label').textContent=l;
+}
+function setStats(s){
+  if(s.a!==undefined)document.getElementById('sv-alerts').textContent=s.a;
+  if(s.z!==undefined)document.getElementById('sv-zones').textContent=s.z+'/8';
+  if(s.s!==undefined)document.getElementById('sv-staff').textContent=s.s;
+  if(s.r!==undefined)document.getElementById('sv-time').textContent=s.r;
+}
+function addSig(tx,c){
+  const log=document.getElementById('siglog');
+  document.getElementById('siglog-idle').style.display='none';
+  log.style.display='flex';
+  const cols={d:'var(--color-text-danger)',w:'var(--color-text-warning)',s:'var(--color-text-success)'};
+  const n=new Date(),ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+  const d=document.createElement('div');
+  d.className='sig-entry';
+  d.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:${cols[c]||cols.s};flex-shrink:0;margin-top:3px"></span><span style="flex:1;color:var(--color-text-primary)">${tx}</span><span style="color:var(--color-text-tertiary);font-size:10px;flex-shrink:0">${ts}</span>`;
+  log.insertBefore(d,log.firstChild);
+  const sf=document.getElementById('sfeed-wrap');
+  sf.style.display='block';
+  const sfl=document.getElementById('sfeed');
+  const d2=d.cloneNode(true);
+  sfl.insertBefore(d2,sfl.firstChild);
+}
+function litFlow(nodeId,connId,cls){
+  document.getElementById(nodeId).className='flow-icon '+cls;
+  if(connId){
+    const fc=document.getElementById(connId);
+    const cc=cls==='lit-d'?'fc-d':cls==='lit-w'?'fc-w':'fc-s';
+    fc.className='flow-conn-fill '+cc;
+    fc.style.width='100%';
+  }
+}
+function addMsg(fr,av,c,tx,out,typ){
+  const feed=document.getElementById('comms-feed');
+  document.getElementById('comms-idle').style.display='none';
+  feed.style.display='flex';
+  const bg={danger:'var(--color-background-danger)',warning:'var(--color-background-warning)',success:'var(--color-background-success)',info:'var(--color-background-info)',gray:'var(--color-background-secondary)'};
+  const col={danger:'var(--color-text-danger)',warning:'var(--color-text-warning)',success:'var(--color-text-success)',info:'var(--color-text-info)',gray:'var(--color-text-secondary)'};
+  const n=new Date(),ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  const row=document.createElement('div');
+  row.className='msg-row slide-up';
+  row.innerHTML=`<div class="msg-av" style="background:${bg[c]||bg.gray};color:${col[c]||col.gray}">${av}</div><div style="flex:1"><div class="msg-meta">${fr} · ${ts}</div>${typ?`<div class="typing"><span></span><span></span><span></span></div>`:`<div class="msg-bub${out?' out':''}">${tx}</div>`}</div>`;
+  feed.appendChild(row);
+  if(typ){
+    const typing=row.querySelector('.typing');
+    setTimeout(()=>{if(typing&&typing.parentNode)typing.outerHTML=`<div class="msg-bub${out?' out':''}">${tx}</div>`;},1200);
+  }
+}
+function triggerIncident(){
+  if(active)return;
+  active=true;
+  const sc=SC[sel];
+  document.getElementById('btn-sim').disabled=true;
+  document.getElementById('btn-sim').textContent=sel.charAt(0).toUpperCase()+sel.slice(1)+' incident in progress...';
+  document.getElementById('btn-res').style.display='block';
+  document.getElementById('badge-ok').style.display='none';
+  document.getElementById('badge-inc').style.display='inline-flex';
+  document.getElementById('elapsed').style.display='inline-block';
+  t0=Date.now();
+  elInt=setInterval(()=>{
+    const s=Math.floor((Date.now()-t0)/1000);
+    document.getElementById('elapsed').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  },500);
+  sc.zones.forEach(z=>setTimeout(()=>setZ(z.id,z.cls,z.st),z.t));
+  sc.sigs.forEach(s=>setTimeout(()=>addSig(s.tx,s.c),s.t));
+  sc.stats.forEach(s=>setTimeout(()=>setStats(s),s.t));
+  sc.sev.forEach(s=>setTimeout(()=>setSev(s.p,s.c,s.l),s.t));
+  sc.flow.forEach(f=>setTimeout(()=>litFlow(f.n,f.f,f.cls),f.t));
+  sc.comms.forEach(c=>setTimeout(()=>addMsg(c.fr,c.av,c.c,c.tx,c.out,c.typ),c.t));
+  const extT=(sc.flow[sc.flow.length-1].t)+400;
+  setTimeout(()=>{
+    const e=sc.ext;
+    document.getElementById('ext-idle').style.display='none';
+    document.getElementById('ext-list').style.display='block';
+    document.getElementById('ext-av').textContent=e.av;
+    document.getElementById('ext-av').style.background=e.bg;
+    document.getElementById('ext-av').style.color=e.col;
+    document.getElementById('ext-name').textContent=e.name;
+    document.getElementById('ext-sub').textContent=e.sub;
+    const eb=document.getElementById('ext-badge');
+    eb.className='badge '+e.bc;
+    eb.textContent=e.badge;
+  },extT);
+  const staffT=(sc.stats.find(s=>s.s>0)||{t:3500}).t;
+  sc.staff.forEach((st,i)=>setTimeout(()=>{
+    const av=document.getElementById('av-'+st.id);
+    av.style.background=st.avBg;
+    av.style.color=st.avC;
+    const b=document.getElementById('b-'+st.id);
+    b.className='badge '+st.badge;
+    b.textContent=st.bTx;
+  },staffT+i*350));
+}
+function resolve(){
+  active=false;
+  clearInterval(elInt);
+  document.getElementById('btn-sim').disabled=false;
+  document.getElementById('btn-sim').textContent='Simulate crisis';
+  document.getElementById('btn-res').style.display='none';
+  document.getElementById('badge-ok').style.display='inline-flex';
+  document.getElementById('badge-inc').style.display='none';
+  document.getElementById('elapsed').style.display='none';
+  setStats({a:0,z:0,s:0,r:'--'});
+  setSev(0,'var(--color-text-secondary)','None');
+  ZONES.forEach(id=>setZ(id,'','No activity'));
+  document.getElementById('comms-idle').style.display='block';
+  document.getElementById('comms-feed').innerHTML='';
+  document.getElementById('comms-feed').style.display='none';
+  document.getElementById('siglog').innerHTML='';
+  document.getElementById('siglog').style.display='none';
+  document.getElementById('siglog-idle').style.display='block';
+  document.getElementById('sfeed').innerHTML='';
+  document.getElementById('sfeed-wrap').style.display='none';
+  ['fn-det','fn-tri','fn-pro','fn-sta','fn-dis'].forEach(id=>document.getElementById(id).className='flow-icon');
+  ['fc1','fc2','fc3','fc4'].forEach(id=>{const e=document.getElementById(id);e.className='flow-conn-fill';e.style.width='0';});
+  document.getElementById('ext-idle').style.display='block';
+  document.getElementById('ext-list').style.display='none';
+  [{id:'ms',t:'Security lead'},{id:'pk',t:'Duty manager'},{id:'jo',t:'First aid'}].forEach(s=>{
+    const av=document.getElementById('av-'+s.id);
+    av.style.background='var(--color-background-secondary)';
+    av.style.color='var(--color-text-secondary)';
+    document.getElementById('b-'+s.id).className='badge badge-green';
+    document.getElementById('b-'+s.id).textContent='On duty';
+  });
+}
+</script>
